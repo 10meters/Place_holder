@@ -11,22 +11,24 @@
       <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
         <h2 class="text-2xl font-semibold text-white mb-6">Explore the Competition</h2>
         <div class="space-y-4">
-          {% for category, businesses in data.Tondo.items() %}
-            {% for name, details in businesses.items() %}
-              <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" 
-                   onclick="showVoronoiForCategory('{{ category }}', '{{ name }}')">
-                <div>
-                  <p class="text-white font-medium">{{ name }}</p>
-                  <p class="text-sm text-gray-400">{{ details.Address }}</p>
+          {% for district, categories in data.items() %}
+            {% for category, businesses in categories.items() %}
+              {% for name, details in businesses.items() %}
+                <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" 
+                     onclick="showVoronoiForCategory('{{ category }}', '{{ name }}')">
+                  <div>
+                    <p class="text-white font-medium">{{ name }}</p>
+                    <p class="text-sm text-gray-400">{{ details.Address }}</p>
+                  </div>
+                  <span class="
+                    {% if category == 'Education' %}bg-yellow-500
+                    {% elif category == 'Hospitals' %}bg-red-500
+                    {% else %}bg-indigo-500{% endif %}
+                    text-white px-3 py-1 rounded-full text-sm">
+                    {{ category }}
+                  </span>
                 </div>
-                <span class="
-                  {% if category == 'Education' %}bg-yellow-500
-                  {% elif category == 'Hospitals' %}bg-red-500
-                  {% else %}bg-indigo-500{% endif %}
-                  text-white px-3 py-1 rounded-full text-sm">
-                  {{ category }}
-                </span>
-              </div>
+              {% endfor %}
             {% endfor %}
           {% endfor %}
         </div>
@@ -75,62 +77,64 @@
 
   // Store all locations data
   const allLocations = {
-    {% for category, businesses in data.Tondo.items() %}
-      "{{ category }}": [
-        {% for name, details in businesses.items() %}
-          {
-            name: "{{ name }}",
-            category: "{{ category }}",
-            lat: parseFloat("{{ details.Coordinates.Latitude }}"),
-            lng: parseFloat("{{ details.Coordinates.Longitude }}"),
-            address: "{{ details.Address }}",
-            contact: "{{ details['Contact Number'] }}",
-            {% if category == 'Education' %}
-            type: "{{ details['Kind of School'] }}"
-            {% endif %}
-          },
-        {% endfor %}
-      ],
+    {% for district, categories in data.items() %}
+      {% for category, businesses in categories.items() %}
+        "{{ category }}": [
+          {% for name, details in businesses.items() %}
+            {
+              name: "{{ name }}",
+              category: "{{ category }}",
+              lat: parseFloat("{{ details.Coordinates.Latitude }}"),
+              lng: parseFloat("{{ details.Coordinates.Longitude }}"),
+              address: "{{ details.Address }}",
+              contact: "{{ details['Contact Number'] }}",
+              {% if category == 'Education' %}
+              type: "{{ details['Kind of School'] }}"
+              {% endif %}
+            },
+          {% endfor %}
+        ],
+      {% endfor %}
     {% endfor %}
   };
 
   // Current state
-  let currentCategory = 'Education';
+  let currentCategory = Object.keys(allLocations)[0] || 'Education';
   let currentHighlight = null;
   let voronoiLayer = null;
   let highlightedMarker = null;
 
   // Enhanced color palettes for each category
-const categoryPalettes = {
-  'Education': [
-    '#FFD700', // Vivid Yellow (Gold)
-    '#FF4500', // Orange-Red
-    '#9400D3', // Deep Purple
-    '#00BFFF', // Bright Sky Blue
-    '#00FA9A'  // Medium Spring Green
-  ],
-  'Hospitals': [
-    '#FF0000', // Pure Red
-    '#00FFFF', // Cyan
-    '#FF00FF', // Magenta
-    '#FFFF00', // Yellow
-    '#FFA500'  // Orange
-  ],
-  'Markets': [
-    '#0000FF', // Pure Blue
-    '#FF8C00', // Dark Orange
-    '#4B0082', // Indigo
-    '#7CFC00', // Lawn Green
-    '#FF1493'  // Deep Pink
-  ],
-  'Default': [
-    '#00FF00', // Pure Green
-    '#FF007F', // Rose
-    '#000080', // Navy Blue
-    '#FFD700', // Gold
-    '#8A2BE2'  // Blue Violet
-  ]
-};
+  const categoryPalettes = {
+    'Education': [
+      '#FFD700', // Vivid Yellow (Gold)
+      '#FF4500', // Orange-Red
+      '#9400D3', // Deep Purple
+      '#00BFFF', // Bright Sky Blue
+      '#00FA9A'  // Medium Spring Green
+    ],
+    'Hospitals': [
+      '#FF0000', // Pure Red
+      '#00FFFF', // Cyan
+      '#FF00FF', // Magenta
+      '#FFFF00', // Yellow
+      '#FFA500'  // Orange
+    ],
+    'Markets': [
+      '#0000FF', // Pure Blue
+      '#FF8C00', // Dark Orange
+      '#4B0082', // Indigo
+      '#7CFC00', // Lawn Green
+      '#FF1493'  // Deep Pink
+    ],
+    'Default': [
+      '#00FF00', // Pure Green
+      '#FF007F', // Rose
+      '#000080', // Navy Blue
+      '#FFD700', // Gold
+      '#8A2BE2'  // Blue Violet
+    ]
+  };
 
   function getColor(category, index) {
     const palette = categoryPalettes[category] || categoryPalettes['Default'];
@@ -253,7 +257,19 @@ const categoryPalettes = {
   map.on('zoomend', handleMapChange);
 
   // Initial render
-  drawVoronoiCells();
+  if (Object.keys(allLocations).length > 0) {
+    // First check if we have any data
+    const firstCategory = Object.keys(allLocations)[0];
+    if (allLocations[firstCategory] && allLocations[firstCategory].length > 0) {
+      // Show the first location in the first category
+      showVoronoiForCategory(firstCategory, allLocations[firstCategory][0].name);
+    } else {
+      // Just draw the map with no voronoi if no data
+      console.log("No location data available");
+    }
+  } else {
+    console.log("No categories available");
+  }
 </script>
 
 {% endblock %}
