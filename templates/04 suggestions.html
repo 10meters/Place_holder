@@ -2,15 +2,8 @@
 {% block content %}
 
 <div class="bg-gray-900 min-h-screen px-6 py-6 lg:px-8">
-  
-  <!-- Return Button -->
-  <div class="mb-4">
-    <a href="{{ url_for('competitors') }}" class="text-indigo-400 hover:text-indigo-300 flex items-center">
-      ← Return to Competitors
-    </a>
-  </div>
 
-  <div class="w-full h-[calc(100vh-5rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div class="w-full h-[calc(100vh-3rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
 
     <!-- Left Column -->
     <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 flex flex-col overflow-hidden">
@@ -21,7 +14,7 @@
         <div class="space-y-4">
 
           <!-- Location Items -->
-          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
                data-name="ABC Food Hub"
                data-info="ABC Food Hub is a prime location with high pedestrian traffic and nearby offices, making it ideal for food businesses.">
             <div>
@@ -31,7 +24,7 @@
             <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Most population efficient</span>
           </div>
 
-          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
                data-name="Clean&Go Laundry"
                data-info="Clean&Go Laundry is located in a densely populated residential area, ensuring a steady flow of customers.">
             <div>
@@ -41,7 +34,7 @@
             <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Most cost-effective price</span>
           </div>
 
-          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
                data-name="LearnSmart Academy"
                data-info="LearnSmart Academy is situated near schools and communities, offering a prime spot for education-focused ventures.">
             <div>
@@ -53,14 +46,24 @@
         </div>
       </div>
 
-      <!-- General Information Section -->
-      <div class="flex-1 p-6 overflow-y-auto border-t border-gray-700" id="general-info">
-        <h2 class="text-2xl font-semibold text-white">General Information</h2>
-        <div id="general-info-content" class="mt-2 text-gray-400 text-lg">
-          Select a location to view more details.
-        </div>
-      </div>
+      <!-- Bottom Half: General Information & Button -->
+      <div class="flex flex-col bg-gray-700 bg-opacity-60 text-gray-400 h-1/2">
 
+        <!-- General Info (3/4 height) -->
+        <div class="flex-1 p-6 overflow-y-auto border-t border-gray-700" id="general-info">
+          <h2 class="text-2xl font-semibold text-white">General Information</h2>
+          <div id="general-info-content" class="mt-2 text-gray-400 text-lg">
+            Select a location to view more details.
+          </div>
+        </div>
+
+        <!-- Return Button (1/4 height) -->
+        <a href="{{ url_for('competitors') }}" 
+           class="h-1/4 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
+          ← Return to Competitors
+        </a>
+
+      </div>
     </div>
 
     <!-- Map -->
