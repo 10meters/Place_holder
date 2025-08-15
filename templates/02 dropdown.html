@@ -20,27 +20,84 @@
         </select>
       </div>
 
-      <!-- Industry Dropdown -->
+      <!-- Industry Button Choices -->
       <div>
-        <label for="industry" class="block text-sm font-medium text-gray-300 mb-2">
-          Industry
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Industry (Select any combination)
         </label>
-        <select id="industry" name="industry" 
-          class="block w-full rounded-md border-0 bg-gray-700 text-white shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2">
-          <option value="">-- Select Industry --</option>
-          <option value="food">Food</option>
-          <option value="laundry">Laundry</option>
-          <option value="education">Education</option>
-        </select>
+        <div class="grid grid-cols-3 gap-3">
+          <!-- Food Option -->
+          <button type="button" data-value="food" class="industry-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg transition-colors">
+            <span class="text-2xl mb-2">🍔</span>
+            <span class="text-sm text-center text-gray-200">Food</span>
+          </button>
+
+          <!-- Laundry Option -->
+          <button type="button" data-value="laundry" class="industry-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg transition-colors">
+            <span class="text-2xl mb-2">🧺</span>
+            <span class="text-sm text-center text-gray-200">Laundry</span>
+          </button>
+
+          <!-- Education Option -->
+          <button type="button" data-value="education" class="industry-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg transition-colors">
+            <span class="text-2xl mb-2">📚</span>
+            <span class="text-sm text-center text-gray-200">Education</span>
+          </button>
+        </div>
+        <!-- Hidden input to store selected values -->
+        <input type="hidden" name="industry" id="industry-input" value="">
       </div>
 
       <!-- Submit Button -->
       <button type="submit" 
-        class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
         Submit
       </button>
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const industryBtns = document.querySelectorAll('.industry-btn');
+    const industryInput = document.getElementById('industry-input');
+    let selectedIndustries = [];
+
+    industryBtns.forEach(btn => {
+      // Add hover effect
+      btn.addEventListener('mouseenter', () => {
+        if (!btn.classList.contains('bg-indigo-600')) {
+          btn.classList.add('bg-gray-600');
+        }
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        if (!btn.classList.contains('bg-indigo-600')) {
+          btn.classList.remove('bg-gray-600');
+        }
+      });
+
+      // Toggle selection
+      btn.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        
+        if (selectedIndustries.includes(value)) {
+          // Deselect
+          this.classList.remove('bg-indigo-600', 'ring-2', 'ring-indigo-400');
+          this.classList.add('bg-gray-700');
+          selectedIndustries = selectedIndustries.filter(item => item !== value);
+        } else {
+          // Select
+          this.classList.remove('bg-gray-700', 'bg-gray-600');
+          this.classList.add('bg-indigo-600', 'ring-2', 'ring-indigo-400');
+          selectedIndustries.push(value);
+        }
+        
+        // Update hidden input value
+        industryInput.value = selectedIndustries.join(',');
+      });
+    });
+  });
+</script>
 
 {% endblock %}
