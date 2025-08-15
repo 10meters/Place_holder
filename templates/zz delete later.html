@@ -1,43 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="bg-gray-900 min-h-screen px-6 py-12 lg:px-8">
-  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
-    <!-- Competitors List (1/3) -->
-    <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 p-6 flex flex-col">
-      <h2 class="text-2xl font-semibold text-white mb-6">Nearby Competitors</h2>
-      <div class="space-y-4 overflow-y-auto">
-        <!-- Competitor Example Item -->
-        <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition">
-          <div>
-            <p class="text-white font-medium">ABC Food Hub</p>
-            <p class="text-sm text-gray-400">1.2 km — Makati</p>
-          </div>
-          <span class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm">Food</span>
-        </div>
+<div class="bg-gray-900 min-h-screen px-6 py-6 lg:px-8">
+  <div class="w-full h-[calc(100vh-3rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition">
-          <div>
-            <p class="text-white font-medium">Clean&Go Laundry</p>
-            <p class="text-sm text-gray-400">850 m — Makati</p>
-          </div>
-          <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Laundry</span>
-        </div>
+    <!-- Left Column -->
+    <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 flex flex-col overflow-hidden">
 
-        <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition">
-          <div>
-            <p class="text-white font-medium">LearnSmart Academy</p>
-            <p class="text-sm text-gray-400">2.1 km — Makati</p>
+      <!-- Top Half: Nearby Competitors -->
+      <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
+        <h2 class="text-2xl font-semibold text-white mb-6">Nearby Competitors</h2>
+        <div class="space-y-4">
+          <!-- Example Items -->
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('ABC Food Hub')">
+            <div>
+              <p class="text-white font-medium">ABC Food Hub</p>
+              <p class="text-sm text-gray-400">1.2 km — Makati</p>
+            </div>
+            <span class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm">Food</span>
           </div>
-          <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Education</span>
+
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('Clean&Go Laundry')">
+            <div>
+              <p class="text-white font-medium">Clean&Go Laundry</p>
+              <p class="text-sm text-gray-400">850 m — Makati</p>
+            </div>
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Laundry</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('LearnSmart Academy')">
+            <div>
+              <p class="text-white font-medium">LearnSmart Academy</p>
+              <p class="text-sm text-gray-400">2.1 km — Makati</p>
+            </div>
+            <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Education</span>
+          </div>
         </div>
       </div>
+
+      <!-- Bottom Half: General Information -->
+      <div id="general-info-section" class="flex-1 p-6 flex items-center justify-center text-gray-400">
+        <span class="text-lg font-medium">General Information</span>
+      </div>
+
     </div>
 
-    <!-- Map (2/3) -->
+    <!-- Map -->
     <div class="lg:col-span-2 bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 overflow-hidden">
-      <div id="map" class="w-full h-[80vh]"></div>
+      <div id="map" class="w-full h-full"></div>
     </div>
   </div>
 </div>
@@ -121,6 +131,29 @@
   map.on('moveend', drawVoronoiCells);
   map.on('zoomend', drawVoronoiCells);
   drawVoronoiCells();
+
+  // Simulated JSON data
+  const companyData = {
+    "ABC Food Hub": {"Type": "Food", "Address": "Makati City", "Contact": "09123456789"},
+    "Clean&Go Laundry": {"Type": "Laundry", "Address": "Makati City", "Contact": "0987654321"},
+    "LearnSmart Academy": {"Type": "Education", "Address": "Makati City", "Contact": "0933444555"}
+  };
+
+  function showGeneralInfo(companyName) {
+    const infoSection = document.getElementById("general-info-section");
+    infoSection.innerHTML = "";
+    const data = companyData[companyName];
+
+    if (data) {
+      const container = document.createElement("div");
+      container.className = "text-white space-y-2";
+      container.innerHTML = `<h3 class="text-xl font-semibold mb-4">${companyName}</h3>`;
+      for (const [key, value] of Object.entries(data)) {
+        container.innerHTML += `<p><span class="font-medium text-gray-300">${key}:</span> ${value}</p>`;
+      }
+      infoSection.appendChild(container);
+    }
+  }
 </script>
 
 {% endblock %}
