@@ -5,13 +5,13 @@
   <div class="max-w-lg w-full bg-gray-800 rounded-xl shadow-lg p-8 ring-1 ring-white/10">
     <h1 class="text-3xl font-semibold text-white mb-8 text-center">Select Your Preferences</h1>
 
-    <form method="POST" action="/submit" class="space-y-6">
+    <form method="POST" action="{{ url_for('user_input') }}" class="space-y-6">
       <!-- Location Dropdown -->
       <div>
         <label for="location" class="block text-sm font-medium text-gray-300 mb-2">
           Location
         </label>
-        <select id="location" name="location" 
+        <select id="location" name="location" required
           class="block w-full rounded-md border-0 bg-gray-700 text-white shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2">
           <option value="">-- Select Location --</option>
           <option value="makati">Makati</option>
@@ -45,14 +45,14 @@
           </button>
         </div>
         <!-- Hidden input to store selected values -->
-        <input type="hidden" name="industry" id="industry-input" value="">
+        <input type="hidden" name="industry" id="industry-input" value="" required>
       </div>
 
-      <!-- Link Styled as Button -->
-      <a href="{{ url_for('suggestions') }}" 
-        class="block text-center w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+      <!-- Submit Button -->
+      <button type="submit" 
+        class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
         Submit
-      </a>
+      </button>
     </form>
   </div>
 </div>
@@ -61,6 +61,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     const industryBtns = document.querySelectorAll('.industry-btn');
     const industryInput = document.getElementById('industry-input');
+    const form = document.querySelector('form');
     let selectedIndustries = [];
 
     industryBtns.forEach(btn => {
@@ -96,6 +97,14 @@
         // Update hidden input value
         industryInput.value = selectedIndustries.join(',');
       });
+    });
+
+    // Form validation before submission
+    form.addEventListener('submit', function(e) {
+      if (!industryInput.value || !document.getElementById('location').value) {
+        e.preventDefault();
+        alert('Please select both location and at least one industry');
+      }
     });
   });
 </script>
