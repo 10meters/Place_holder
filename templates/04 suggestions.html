@@ -2,44 +2,53 @@
 {% block content %}
 
 <div class="bg-gray-900 min-h-screen px-6 py-6 lg:px-8">
+
   <div class="w-full h-[calc(100vh-3rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
 
     <!-- Left Column -->
     <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 flex flex-col overflow-hidden">
 
-      <!-- Top Half: Nearby Competitors -->
+      <!-- Potential Locations List -->
       <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
-        <h2 class="text-2xl font-semibold text-white mb-6">Explore the Competition</h2>
+        <h2 class="text-2xl font-semibold text-white mb-6">Potential Locations for You</h2>
         <div class="space-y-4">
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('ABC Food Hub')">
+
+          <!-- Location Items -->
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
+               data-name="ABC Food Hub"
+               data-info="ABC Food Hub is a prime location with high pedestrian traffic and nearby offices, making it ideal for food businesses.">
             <div>
               <p class="text-white font-medium">ABC Food Hub</p>
               <p class="text-sm text-gray-400">1.2 km — Makati</p>
             </div>
-            <span class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm">Food</span>
+            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Most population efficient</span>
           </div>
 
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('Clean&Go Laundry')">
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
+               data-name="Clean&Go Laundry"
+               data-info="Clean&Go Laundry is located in a densely populated residential area, ensuring a steady flow of customers.">
             <div>
               <p class="text-white font-medium">Clean&Go Laundry</p>
               <p class="text-sm text-gray-400">850 m — Makati</p>
             </div>
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Laundry</span>
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Most cost-effective price</span>
           </div>
 
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('LearnSmart Academy')">
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
+               data-name="LearnSmart Academy"
+               data-info="LearnSmart Academy is situated near schools and communities, offering a prime spot for education-focused ventures.">
             <div>
               <p class="text-white font-medium">LearnSmart Academy</p>
               <p class="text-sm text-gray-400">2.1 km — Makati</p>
             </div>
-            <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Education</span>
           </div>
+
         </div>
       </div>
 
       <!-- Bottom Half: General Information & Button -->
       <div class="flex flex-col bg-gray-700 bg-opacity-60 text-gray-400 h-1/2">
-        
+
         <!-- General Info (3/4 height) -->
         <div class="flex-1 p-6 overflow-y-auto border-t border-gray-700" id="general-info">
           <h2 class="text-2xl font-semibold text-white">General Information</h2>
@@ -48,20 +57,20 @@
           </div>
         </div>
 
-        <!-- Set-up Business Button (1/4 height) -->
-        <a href="{{ url_for('suggestions') }}" 
+        <!-- Return Button (1/4 height) -->
+        <a href="{{ url_for('competitors') }}" 
            class="h-1/4 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
-          Set-up Your Business Here →
+          ← Return to Competitors
         </a>
 
       </div>
-
     </div>
 
     <!-- Map -->
     <div class="lg:col-span-2 bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 overflow-hidden">
       <div id="map" class="w-full h-full"></div>
     </div>
+
   </div>
 </div>
 
@@ -77,27 +86,25 @@
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  const hospitals = [
-    {name: "Philippine General Hospital", lat: 14.5826, lng: 120.9889},
-    {name: "St. Luke's Medical Center", lat: 14.5638, lng: 121.0294},
-    {name: "Manila Doctors Hospital", lat: 14.5762, lng: 120.9869},
-    {name: "Chinese General Hospital", lat: 14.6184, lng: 120.9958}
+  const locations = [
+    {name: "ABC Food Hub", lat: 14.5826, lng: 120.9889, tag: "Highest population efficiency"},
+    {name: "Clean&Go Laundry", lat: 14.5638, lng: 121.0294, tag: "Most cost-effective price"},
+    {name: "LearnSmart Academy", lat: 14.5762, lng: 120.9869}
   ];
 
   function getColor(index) {
     const colors = [
       'rgba(255, 99, 132, 0.5)',
       'rgba(54, 162, 235, 0.5)',
-      'rgba(255, 206, 86, 0.5)',
-      'rgba(75, 192, 192, 0.5)'
+      'rgba(255, 206, 86, 0.5)'
     ];
     return colors[index % colors.length];
   }
 
   function createVoronoiDiagram() {
-    const points = hospitals.map(h => {
-      const pt = map.latLngToContainerPoint([h.lat, h.lng]);
-      return [pt.x, pt.y, h];
+    const points = locations.map(l => {
+      const pt = map.latLngToContainerPoint([l.lat, l.lng]);
+      return [pt.x, pt.y, l];
     });
 
     const voronoi = d3.voronoi()
@@ -107,7 +114,7 @@
     return voronoi.polygons().map((polygon, i) => {
       if (!polygon) return null;
       const latLngs = polygon.map(p => map.containerPointToLatLng([p[0], p[1]]));
-      return { polygon: latLngs, hospital: points[i][2] };
+      return { polygon: latLngs, location: points[i][2] };
     }).filter(Boolean);
   }
 
@@ -125,19 +132,15 @@
         weight: 1,
         opacity: 0.8,
         color: '#333'
-      }).bindPopup(`<b>${cell.hospital.name}</b>`).addTo(voronoiLayer);
+      }).bindPopup(`<b>${cell.location.name}</b>`).addTo(voronoiLayer);
     });
 
-    hospitals.forEach((h, i) => {
-      const color = getColor(i).replace('0.5', '1');
-      L.circleMarker([h.lat, h.lng], {
-        radius: 6,
-        fillColor: color,
-        color: '#333',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).bindPopup(`<b>${h.name}</b>`).addTo(voronoiLayer);
+    locations.forEach((loc) => {
+      L.marker([loc.lat, loc.lng], {icon: L.icon({
+        iconUrl: 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png',
+        iconSize: [27, 43],
+        iconAnchor: [13, 41]
+      })}).bindPopup(`<b>${loc.name}</b>`).addTo(voronoiLayer);
     });
   }
 
@@ -145,26 +148,19 @@
   map.on('zoomend', drawVoronoiCells);
   drawVoronoiCells();
 
-  // Company Data
-  const companyData = {
-    "ABC Food Hub": {"Type": "Food", "Address": "Makati City", "Contact": "09123456789"},
-    "Clean&Go Laundry": {"Type": "Laundry", "Address": "Makati City", "Contact": "0987654321"},
-    "LearnSmart Academy": {"Type": "Education", "Address": "Makati City", "Contact": "0933444555"}
-  };
-
-  function showGeneralInfo(companyName) {
-    const infoContent = document.getElementById("general-info-content");
-    infoContent.innerHTML = `
-      <div>
-        <h4 class="text-lg font-medium mb-2">${companyName}</h4>
-        ${Object.entries(companyData[companyName])
-          .map(([key, value]) => `<p><span class="font-medium text-gray-300">${key}:</span> ${value}</p>`)
-          .join('')}
-      </div>
-    `;
-    infoContent.classList.remove("text-gray-400");
-    infoContent.classList.add("text-white");
-  }
+  // Update General Info
+  document.querySelectorAll('.location-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const name = item.dataset.name;
+      const info = item.dataset.info;
+      document.getElementById('general-info-content').innerHTML = `
+        <div>
+          <h3 class="text-xl font-semibold text-white">${name}</h3>
+          <p class="text-gray-300">${info}</p>
+        </div>
+      `;
+    });
+  });
 </script>
 
 {% endblock %}
