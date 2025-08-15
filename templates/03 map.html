@@ -9,9 +9,8 @@
 
       <!-- Top Half: Nearby Competitors -->
       <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
-        <h2 class="text-2xl font-semibold text-white mb-6">Nearby Competitors</h2>
+        <h2 class="text-2xl font-semibold text-white mb-6">Explore the Competition</h2>
         <div class="space-y-4">
-          <!-- Example Items -->
           <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('ABC Food Hub')">
             <div>
               <p class="text-white font-medium">ABC Food Hub</p>
@@ -38,10 +37,20 @@
         </div>
       </div>
 
-      <!-- Bottom Half: General Information -->
-      <div id="general-info-section" 
-           class="flex-1 p-6 flex items-center justify-center bg-gray-700 bg-opacity-60 text-gray-400">
-        <span class="text-lg font-medium">General Information</span>
+      <!-- Bottom Half: General Information & Button -->
+      <div id="general-info-section" class="flex flex-col bg-gray-700 bg-opacity-60 text-gray-400 h-1/2">
+        
+        <!-- General Info (3/4 height) -->
+        <div id="general-info-content" class="flex-1 p-6 flex items-center justify-center">
+          <span class="text-lg font-medium">General Information</span>
+        </div>
+
+        <!-- Set-up Business Button (1/4 height) -->
+        <a href="{{ url_for('suggestions') }}" 
+           class="h-1/4 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
+          Set-up Your Business Here →
+        </a>
+
       </div>
 
     </div>
@@ -141,7 +150,7 @@
   };
 
   function showGeneralInfo(companyName) {
-    const infoSection = document.getElementById("general-info-section");
+    const infoSection = document.getElementById("general-info-content");
     infoSection.classList.remove("items-center", "justify-center", "text-gray-400");
     infoSection.classList.add("items-start", "justify-start", "text-white");
     infoSection.innerHTML = `
