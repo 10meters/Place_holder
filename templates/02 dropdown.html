@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bg-gray-900 min-h-screen flex flex-col items-center justify-center px-6 lg:px-8">
+  <div class="max-w-lg w-full bg-gray-800 rounded-xl shadow-lg p-8 ring-1 ring-white/10">
+    <h1 class="text-3xl font-semibold text-white mb-8 text-center">Select Your Preferences</h1>
+
+    <form method="POST" action="/submit" class="space-y-6">
+      <!-- Location Dropdown -->
+      <div>
+        <label for="location" class="block text-sm font-medium text-gray-300 mb-2">
+          Location
+        </label>
+        <select id="location" name="location" 
+          class="block w-full rounded-md border-0 bg-gray-700 text-white shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2">
+          <option value="">-- Select Location --</option>
+          <option value="makati">Makati</option>
+          <option value="manila">Manila</option>
+          <option value="taft">Taft</option>
+        </select>
+      </div>
+
+      <!-- Industry Dropdown -->
+      <div>
+        <label for="industry" class="block text-sm font-medium text-gray-300 mb-2">
+          Industry
+        </label>
+        <select id="industry" name="industry" 
+          class="block w-full rounded-md border-0 bg-gray-700 text-white shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2">
+          <option value="">-- Select Industry --</option>
+          <option value="food">Food</option>
+          <option value="laundry">Laundry</option>
+          <option value="education">Education</option>
+        </select>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" 
+        class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+        Submit
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
