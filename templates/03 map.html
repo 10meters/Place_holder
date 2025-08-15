@@ -38,11 +38,14 @@
       </div>
 
       <!-- Bottom Half: General Information & Button -->
-      <div id="general-info-section" class="flex flex-col bg-gray-700 bg-opacity-60 text-gray-400 h-1/2">
+      <div class="flex flex-col bg-gray-700 bg-opacity-60 text-gray-400 h-1/2">
         
         <!-- General Info (3/4 height) -->
-        <div id="general-info-content" class="flex-1 p-6 flex items-center justify-center">
-          <span class="text-lg font-medium">General Information</span>
+        <div class="flex-1 p-6 overflow-y-auto border-t border-gray-700" id="general-info">
+          <h2 class="text-2xl font-semibold text-white">General Information</h2>
+          <div id="general-info-content" class="mt-2 text-gray-400 text-lg">
+            Select a location to view more details.
+          </div>
         </div>
 
         <!-- Set-up Business Button (1/4 height) -->
@@ -142,7 +145,7 @@
   map.on('zoomend', drawVoronoiCells);
   drawVoronoiCells();
 
-  // Simulated JSON data
+  // Company Data
   const companyData = {
     "ABC Food Hub": {"Type": "Food", "Address": "Makati City", "Contact": "09123456789"},
     "Clean&Go Laundry": {"Type": "Laundry", "Address": "Makati City", "Contact": "0987654321"},
@@ -150,18 +153,17 @@
   };
 
   function showGeneralInfo(companyName) {
-    const infoSection = document.getElementById("general-info-content");
-    infoSection.classList.remove("items-center", "justify-center", "text-gray-400");
-    infoSection.classList.add("items-start", "justify-start", "text-white");
-    infoSection.innerHTML = `
-      <div class="w-full">
-        <h3 class="text-xl font-semibold mb-4">General Information</h3>
+    const infoContent = document.getElementById("general-info-content");
+    infoContent.innerHTML = `
+      <div>
         <h4 class="text-lg font-medium mb-2">${companyName}</h4>
         ${Object.entries(companyData[companyName])
           .map(([key, value]) => `<p><span class="font-medium text-gray-300">${key}:</span> ${value}</p>`)
           .join('')}
       </div>
     `;
+    infoContent.classList.remove("text-gray-400");
+    infoContent.classList.add("text-white");
   }
 </script>
 

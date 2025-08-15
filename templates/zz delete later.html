@@ -1,160 +1,17 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Product</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-<div class="bg-gray-900 min-h-screen px-6 py-6 lg:px-8">
-  <div class="w-full h-[calc(100vh-3rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-    <!-- Left Column -->
-    <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 flex flex-col overflow-hidden">
-
-      <!-- Top Half: Nearby Competitors -->
-      <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
-        <h2 class="text-2xl font-semibold text-white mb-6">Nearby Competitors</h2>
-        <div class="space-y-4">
-          <!-- Example Items -->
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('ABC Food Hub')">
-            <div>
-              <p class="text-white font-medium">ABC Food Hub</p>
-              <p class="text-sm text-gray-400">1.2 km — Makati</p>
-            </div>
-            <span class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm">Food</span>
-          </div>
-
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('Clean&Go Laundry')">
-            <div>
-              <p class="text-white font-medium">Clean&Go Laundry</p>
-              <p class="text-sm text-gray-400">850 m — Makati</p>
-            </div>
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Laundry</span>
-          </div>
-
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" onclick="showGeneralInfo('LearnSmart Academy')">
-            <div>
-              <p class="text-white font-medium">LearnSmart Academy</p>
-              <p class="text-sm text-gray-400">2.1 km — Makati</p>
-            </div>
-            <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Education</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom Half: General Information -->
-      <div id="general-info-section" class="flex-1 p-6 flex items-center justify-center text-gray-400">
-        <span class="text-lg font-medium">General Information</span>
-      </div>
-
-    </div>
-
-    <!-- Map -->
-    <div class="lg:col-span-2 bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 overflow-hidden">
-      <div id="map" class="w-full h-full"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Leaflet & D3 Scripts -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script src="https://unpkg.com/d3-voronoi@1.1.4/dist/d3-voronoi.min.js"></script>
-
-<script>
-  const map = L.map('map').setView([14.5995, 120.9842], 13);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  const hospitals = [
-    {name: "Philippine General Hospital", lat: 14.5826, lng: 120.9889},
-    {name: "St. Luke's Medical Center", lat: 14.5638, lng: 121.0294},
-    {name: "Manila Doctors Hospital", lat: 14.5762, lng: 120.9869},
-    {name: "Chinese General Hospital", lat: 14.6184, lng: 120.9958}
-  ];
-
-  function getColor(index) {
-    const colors = [
-      'rgba(255, 99, 132, 0.5)',
-      'rgba(54, 162, 235, 0.5)',
-      'rgba(255, 206, 86, 0.5)',
-      'rgba(75, 192, 192, 0.5)'
-    ];
-    return colors[index % colors.length];
-  }
-
-  function createVoronoiDiagram() {
-    const points = hospitals.map(h => {
-      const pt = map.latLngToContainerPoint([h.lat, h.lng]);
-      return [pt.x, pt.y, h];
-    });
-
-    const voronoi = d3.voronoi()
-      .extent([[-1, -1], [map.getSize().x + 1, map.getSize().y + 1]])
-      (points.map(d => [d[0], d[1]]));
-
-    return voronoi.polygons().map((polygon, i) => {
-      if (!polygon) return null;
-      const latLngs = polygon.map(p => map.containerPointToLatLng([p[0], p[1]]));
-      return { polygon: latLngs, hospital: points[i][2] };
-    }).filter(Boolean);
-  }
-
-  function drawVoronoiCells() {
-    if (window.voronoiLayer) map.removeLayer(window.voronoiLayer);
-    const polygons = createVoronoiDiagram();
-    const voronoiLayer = L.layerGroup().addTo(map);
-    window.voronoiLayer = voronoiLayer;
-
-    polygons.forEach((cell, i) => {
-      const color = getColor(i);
-      L.polygon(cell.polygon, {
-        fillColor: color,
-        fillOpacity: 0.5,
-        weight: 1,
-        opacity: 0.8,
-        color: '#333'
-      }).bindPopup(`<b>${cell.hospital.name}</b>`).addTo(voronoiLayer);
-    });
-
-    hospitals.forEach((h, i) => {
-      const color = getColor(i).replace('0.5', '1');
-      L.circleMarker([h.lat, h.lng], {
-        radius: 6,
-        fillColor: color,
-        color: '#333',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).bindPopup(`<b>${h.name}</b>`).addTo(voronoiLayer);
-    });
-  }
-
-  map.on('moveend', drawVoronoiCells);
-  map.on('zoomend', drawVoronoiCells);
-  drawVoronoiCells();
-
-  // Simulated JSON data
-  const companyData = {
-    "ABC Food Hub": {"Type": "Food", "Address": "Makati City", "Contact": "09123456789"},
-    "Clean&Go Laundry": {"Type": "Laundry", "Address": "Makati City", "Contact": "0987654321"},
-    "LearnSmart Academy": {"Type": "Education", "Address": "Makati City", "Contact": "0933444555"}
-  };
-
-  function showGeneralInfo(companyName) {
-    const infoSection = document.getElementById("general-info-section");
-    infoSection.innerHTML = "";
-    const data = companyData[companyName];
-
-    if (data) {
-      const container = document.createElement("div");
-      container.className = "text-white space-y-2";
-      container.innerHTML = `<h3 class="text-xl font-semibold mb-4">${companyName}</h3>`;
-      for (const [key, value] of Object.entries(data)) {
-        container.innerHTML += `<p><span class="font-medium text-gray-300">${key}:</span> ${value}</p>`;
-      }
-      infoSection.appendChild(container);
-    }
-  }
-</script>
-
-{% endblock %}
-
+<body class="bg-gray-100">
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

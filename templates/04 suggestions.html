@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bg-gray-900 min-h-screen px-6 py-6 lg:px-8">
+  
+  <!-- Return Button -->
+  <div class="mb-4">
+    <a href="{{ url_for('competitors') }}" class="text-indigo-400 hover:text-indigo-300 flex items-center">
+      ← Return to Competitors
+    </a>
+  </div>
+
+  <div class="w-full h-[calc(100vh-5rem)] grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left Column -->
+    <div class="bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 flex flex-col overflow-hidden">
+
+      <!-- Potential Locations List -->
+      <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
+        <h2 class="text-2xl font-semibold text-white mb-6">Potential Locations for You</h2>
+        <div class="space-y-4">
+
+          <!-- Location Items -->
+          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+               data-name="ABC Food Hub"
+               data-info="ABC Food Hub is a prime location with high pedestrian traffic and nearby offices, making it ideal for food businesses.">
+            <div>
+              <p class="text-white font-medium">ABC Food Hub</p>
+              <p class="text-sm text-gray-400">1.2 km — Makati</p>
+            </div>
+            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Most population efficient</span>
+          </div>
+
+          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+               data-name="Clean&Go Laundry"
+               data-info="Clean&Go Laundry is located in a densely populated residential area, ensuring a steady flow of customers.">
+            <div>
+              <p class="text-white font-medium">Clean&Go Laundry</p>
+              <p class="text-sm text-gray-400">850 m — Makati</p>
+            </div>
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Most cost-effective price</span>
+          </div>
+
+          <div class="location-item flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+               data-name="LearnSmart Academy"
+               data-info="LearnSmart Academy is situated near schools and communities, offering a prime spot for education-focused ventures.">
+            <div>
+              <p class="text-white font-medium">LearnSmart Academy</p>
+              <p class="text-sm text-gray-400">2.1 km — Makati</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- General Information Section -->
+      <div class="flex-1 p-6 overflow-y-auto border-t border-gray-700" id="general-info">
+        <h2 class="text-2xl font-semibold text-white">General Information</h2>
+        <div id="general-info-content" class="mt-2 text-gray-400 text-lg">
+          Select a location to view more details.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Map -->
+    <div class="lg:col-span-2 bg-gray-800 rounded-xl shadow-lg ring-1 ring-white/10 overflow-hidden">
+      <div id="map" class="w-full h-full"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Leaflet & D3 Scripts -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/d3-voronoi@1.1.4/dist/d3-voronoi.min.js"></script>
+
+<script>
+  const map = L.map('map').setView([14.5995, 120.9842], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const locations = [
+    {name: "ABC Food Hub", lat: 14.5826, lng: 120.9889, tag: "Highest population efficiency"},
+    {name: "Clean&Go Laundry", lat: 14.5638, lng: 121.0294, tag: "Most cost-effective price"},
+    {name: "LearnSmart Academy", lat: 14.5762, lng: 120.9869}
+  ];
+
+  function getColor(index) {
+    const colors = [
+      'rgba(255, 99, 132, 0.5)',
+      'rgba(54, 162, 235, 0.5)',
+      'rgba(255, 206, 86, 0.5)'
+    ];
+    return colors[index % colors.length];
+  }
+
+  function createVoronoiDiagram() {
+    const points = locations.map(l => {
+      const pt = map.latLngToContainerPoint([l.lat, l.lng]);
+      return [pt.x, pt.y, l];
+    });
+
+    const voronoi = d3.voronoi()
+      .extent([[-1, -1], [map.getSize().x + 1, map.getSize().y + 1]])
+      (points.map(d => [d[0], d[1]]));
+
+    return voronoi.polygons().map((polygon, i) => {
+      if (!polygon) return null;
+      const latLngs = polygon.map(p => map.containerPointToLatLng([p[0], p[1]]));
+      return { polygon: latLngs, location: points[i][2] };
+    }).filter(Boolean);
+  }
+
+  function drawVoronoiCells() {
+    if (window.voronoiLayer) map.removeLayer(window.voronoiLayer);
+    const polygons = createVoronoiDiagram();
+    const voronoiLayer = L.layerGroup().addTo(map);
+    window.voronoiLayer = voronoiLayer;
+
+    polygons.forEach((cell, i) => {
+      const color = getColor(i);
+      L.polygon(cell.polygon, {
+        fillColor: color,
+        fillOpacity: 0.5,
+        weight: 1,
+        opacity: 0.8,
+        color: '#333'
+      }).bindPopup(`<b>${cell.location.name}</b>`).addTo(voronoiLayer);
+    });
+
+    locations.forEach((loc) => {
+      L.marker([loc.lat, loc.lng], {icon: L.icon({
+        iconUrl: 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png',
+        iconSize: [27, 43],
+        iconAnchor: [13, 41]
+      })}).bindPopup(`<b>${loc.name}</b>`).addTo(voronoiLayer);
+    });
+  }
+
+  map.on('moveend', drawVoronoiCells);
+  map.on('zoomend', drawVoronoiCells);
+  drawVoronoiCells();
+
+  // Update General Info
+  document.querySelectorAll('.location-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const name = item.dataset.name;
+      const info = item.dataset.info;
+      document.getElementById('general-info-content').innerHTML = `
+        <div>
+          <h3 class="text-xl font-semibold text-white">${name}</h3>
+          <p class="text-gray-300">${info}</p>
+        </div>
+      `;
+    });
+  });
+</script>
+
+{% endblock %}
+
