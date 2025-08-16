@@ -6,8 +6,8 @@
                 "Kind of School": "Elementary School",
                 "Contact Number": "(02) 8252 8593",
                 "Coordinates": {
-                    "Latitude": "14.62293",
-                    "Longitude": "120.96248"
+                    "Latitude": "14.6232443",
+                    "Longitude": "120.962332"
                 },
                 "Population": 107613
             },
@@ -16,7 +16,7 @@
                 "Kind of School": "Elementary School",
                 "Contact Number": "523 9868",
                 "Coordinates": {
-                    "Latitude": "14.6189",
+                    "Latitude": "14.6289",
                     "Longitude": "120.9683"
                 },
                 "Population": 113827
@@ -26,8 +26,8 @@
                 "Kind of School": "High School",
                 "Contact Number": "0915 424 7942",
                 "Coordinates": {
-                    "Latitude": "14.6175",
-                    "Longitude": "120.9700"
+                    "Latitude": "14.6306531",
+                    "Longitude": "120.9635188"
                 },
                 "Population": 32056
             },
@@ -36,8 +36,8 @@
                 "Kind of School": "High School",
                 "Contact Number": "(02) 8255 2639",
                 "Coordinates": {
-                    "Latitude": "14.6200",
-                    "Longitude": "120.9650"
+                    "Latitude": "14.6268018",
+                    "Longitude": "120.9688259"
                 },
                 "Population": 51348
             },
@@ -46,8 +46,8 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "(02) 8253 6754",
                 "Coordinates": {
-                    "Latitude": "14.6210",
-                    "Longitude": "120.9690"
+                    "Latitude": "14.6249012",
+                    "Longitude": "120.9653627"
                 },
                 "Population": 19626
             },
@@ -56,8 +56,8 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "0917 469 0718",
                 "Coordinates": {
-                    "Latitude": "14.6220",
-                    "Longitude": "120.9680"
+                    "Latitude": "14.6174141",
+                    "Longitude": "120.9724013"
                 },
                 "Population": 115456
             },
@@ -66,8 +66,8 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "(02) 8253 7958",
                 "Coordinates": {
-                    "Latitude": "14.6230",
-                    "Longitude": "120.9700"
+                    "Latitude": "14.6240419",
+                    "Longitude": "120.9627869"
                 },
                 "Population": 35982
             },
@@ -76,8 +76,8 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "(02) 8252 3872",
                 "Coordinates": {
-                    "Latitude": "14.6160",
-                    "Longitude": "120.9690"
+                    "Latitude": "14.6190132",
+                    "Longitude": "120.9684366"
                 },
                 "Population": 27304
             },
@@ -86,8 +86,8 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "(02) 8252 6259",
                 "Coordinates": {
-                    "Latitude": "14.6155",
-                    "Longitude": "120.9710"
+                    "Latitude": "14.6174141",
+                    "Longitude": "120.9624013"
                 },
                 "Population": 44644
             },
@@ -96,12 +96,114 @@
                 "Kind of School": "Elementary and High School",
                 "Contact Number": "(02) 8247 2450",
                 "Coordinates": {
-                    "Latitude": "14.6202",
-                    "Longitude": "120.9690"
+                    "Latitude": "14.6094756",
+                    "Longitude": "120.9665733"
                 },
                 "Population": 106798
             }
-        }
+        },
+        "Food": {
+            "Rado's Lechon": {
+                "Address": "2137 simon st.cor.f, Varona St, Tondo, Manila, Metro Manila",
+                "Contact Number": "0927 459 1167",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6232443",
+                    "Longitude": "120.962332"
+                },
+                "Population": 10016
+            },
+            "Boss Ivan Sisig Houset": {
+                "Address": "1758 Simoun St, Tondo, Manila, 1013 Metro Manila",
+                "Contact Number": "0916 345 6489",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6228001",
+                    "Longitude": "120.9595996"
+                },
+                "Population": 64234
+            },
+            "Bulalord Manila": {
+                "Address": "515 Lakandula St, Tondo, Manila, Metro Manila",
+                "Contact Number": "0906 437 2025",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6166154",
+                    "Longitude": "120.9673675"
+                },
+                "Population": 66203
+            },
+            "Steak and Whine MNL": {
+                "Address": "2460 A. Bonifacio St, Vitas St, Tondo, Manila",
+                "Contact Number": "0917 620 2903",
+                "Cuisine": "American",
+                "Coordinates": {
+                    "Latitude": "14.6264414",
+                    "Longitude": "120.9609298"
+                },
+                "Population": 60190
+            },
+            "PASTIL-an Sayo?": {
+                "Address": "FIRST DISTRICT - TONDO I/II, 278 Lakandula St, Tondo, Manila, 1012 Metro Manila",
+                "Contact Number": "0998 315 7218",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6224872",
+                    "Longitude": "120.9628568"
+                },
+                "Population": 22038
+            },
+            "Kape Oyat": {
+                "Address": "1075 Lualhati St, Tondo, Manila, 1013 Metro Manila",
+                "Contact Number": "0976 049 8702",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6224194",
+                    "Longitude": "120.9627541"
+                },
+                "Population": 20084
+            },
+            "Orcas Seafood Restaurant": {
+                "Address": "2201 Velasquez St, Tondo, Manila, 1012 Metro Manila",
+                "Contact Number": "0961 339 5378",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6168967",
+                    "Longitude": "120.9415659"
+                },
+                "Population": 70213
+            },
+            "Lan Zhou La Mian": {
+                "Address": "1356 Masangkay St, 262 Zone 24 Tondo Manila, Manila, 1013 Masangkay St, 262 Zone 24 Tondo Manila, Manila, 1013 Metro Manila",
+                "Contact Number": "(02) 8559 9466",
+                "Cuisine": "Chinese",
+                "Coordinates": {
+                    "Latitude": "14.6168967",
+                    "Longitude": "120.9415659"
+                },
+                "Population": 124447
+            },
+            "Bogzki's Food Garage": {
+                "Address": "613 Francisco St, Tondo, Manila, 1012 Metro Manila",
+                "Contact Number": "(02) 8775 4126",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6268967",
+                    "Longitude": "120.9615659"
+                },
+                "Population": 72205
+            },
+            "Tondo Tondo Cafe": {
+                "Address": "Zone 7 District 1, 1739 Velasquez Street, corner Dandan St, Tondo, Manila, 1012 Metro Manila",
+                "Contact Number": "0969 912 6825",
+                "Cuisine": "Filipino",
+                "Coordinates": {
+                    "Latitude": "14.6168967",
+                    "Longitude": "120.9615659"
+                },
+                "Population": 104589
+            }
+        }   
     },
     "District 5": {        
         "Hospitals": {
@@ -204,8 +306,8 @@
                 "Contact Number": "(02) 8241 9990",
                 "Cuisine": "Chinese",
                 "Coordinates": {
-                    "Latitude": "14.5712613",
-                    "Longitude": "120.9428719"
+                    "Latitude": "14.602613",
+                    "Longitude": "120.9728719"
                 },
                 "Population": 3550
             },
@@ -215,7 +317,7 @@
                 "Cuisine": "Chinese",
                 "Coordinates": {
                     "Latitude": "14.5979751",
-                    "Longitude": "120.9721049"
+                    "Longitude": "120.9731049"
                 },
                 "Population": 1179
             },
@@ -225,7 +327,7 @@
                 "Cuisine": "Chinese",
                 "Coordinates": {
                     "Latitude": "14.5980009",
-                    "Longitude": "120.9643533"
+                    "Longitude": "120.9733533"
                 },
                 "Population": 2398
             },
@@ -255,7 +357,7 @@
                 "Cuisine": "Chinese",
                 "Coordinates": {
                     "Latitude": "14.6005856",
-                    "Longitude": "120.9815274"
+                    "Longitude": "120.9745274"
                 },
                 "Population": 3835
             },
@@ -275,7 +377,7 @@
                 "Cuisine": "Japanese",
                 "Coordinates": {
                     "Latitude": "14.5976459",
-                    "Longitude": "120.9609205"
+                    "Longitude": "120.9709205"
                 },
                 "Population": 1179
             },
@@ -285,7 +387,7 @@
                 "Cuisine": "Filipino and Chinese",
                 "Coordinates": {
                     "Latitude": "14.597906",
-                    "Longitude": "120.9303525"
+                    "Longitude": "120.9703525"
                 },
                 "Population": 2492
             },
