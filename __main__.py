@@ -1,6 +1,5 @@
 from flask import *
 
-import requests
 import json
 from typing import Dict, List
 import ast
@@ -28,6 +27,72 @@ def get_location_data(user_input):
     
     return result
 
+import json
+import pandas as pd
+from math import radians, cos
+
+def suggest_locations(lamudi_file_path):
+    """Process property data from Lamudi Excel file"""
+    try:
+        lamudi_df = pd.read_excel(lamudi_file_path)
+        print(f"Loaded {len(lamudi_df)} properties")
+    except Exception as e:
+        return {"error": f"Failed to load Lamudi data: {str(e)}"}
+    
+    results = []
+    for idx, row in lamudi_df.iterrows():
+        try:
+            results.append({
+                "name": str(row['name']),  # Directly use the name column
+                "area_in_sqm": f"{int(row['sqm'])} sqm",
+                "price": f"₱{int(row['price']):,}/month",
+                "coordinates": {
+                    "lat": float(row['latitude']),
+                    "lng": float(row['longitude'])
+                }
+            })
+        except Exception as e:
+            print(f"Skipping row {idx}: {str(e)}")
+            continue
+    
+    # Calculate highlights
+    highlights = {
+        "cheapest": "N/A",
+        "biggest": "N/A",
+        "most_cost_effective": "N/A"
+    }
+    
+    if results:
+        try:
+            # Add temporary numerical fields
+            for loc in results:
+                loc['_price'] = float(loc['price'][1:].replace(',', '').replace('/month', ''))
+                loc['_area'] = float(loc['area_in_sqm'].replace(' sqm', ''))
+                loc['_value'] = loc['_price'] / loc['_area']
+            
+            highlights = {
+                "cheapest": min(results, key=lambda x: x['_price'])['name'],
+                "biggest": max(results, key=lambda x: x['_area'])['name'],
+                "most_cost_effective": min(results, key=lambda x: x['_value'])['name']
+            }
+            
+            # Remove temporary fields
+            for loc in results:
+                loc.pop('_price', None)
+                loc.pop('_area', None)
+                loc.pop('_value', None)
+        except Exception as e:
+            print(f"Highlight calculation error: {str(e)}")
+    
+    return {
+        "properties": results,
+        "highlights": highlights
+    }
+
+
+###
+###
+###
 print('HAH')
 app = Flask(__name__)
 
@@ -53,16 +118,17 @@ def user_input():
 
 @app.route("/map/<location>/<industries>")
 def map(location, industries):
-    print(location, industries)
-
     voronoi_data = get_location_data({"location":location, "industries":industries})
-    print(voronoi_data)
-    return render_template("03 map.html", data=voronoi_data)
+    input = {"location":location, "industries":industries}
+    return render_template("03 map.html", data=voronoi_data, input=input)
 
-@app.route("/suggestions")
-def suggestions():
-    
-    return render_template("04 suggestions.html", data=voronoi_data)
+@app.route("/suggestions/<location>/<industries>")
+def suggestions(location, industries):
+    input = {"location":location, "industries":industries}
+    voronoi_data = get_location_data({"location":location, "industries":industries})
+    suggestions = suggest_locations('lamudi.xlsx')
+    print(suggestions)
+    return render_template("04 suggestions.html", input=input, suggestions=suggestions, data=voronoi_data)
 
 
 

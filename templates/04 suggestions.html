@@ -13,35 +13,75 @@
         <h2 class="text-2xl font-semibold text-white mb-6">Potential Locations for You</h2>
         <div class="space-y-4">
 
-          <!-- Location Items -->
-          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
-               data-name="ABC Food Hub"
-               data-info="ABC Food Hub is a prime location with high pedestrian traffic and nearby offices, making it ideal for food businesses.">
-            <div>
-              <p class="text-white font-medium">ABC Food Hub</p>
-              <p class="text-sm text-gray-400">1.2 km — Makati</p>
-            </div>
-            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Most population efficient</span>
-          </div>
+          <!-- Sort properties by highlight priority: cost_effective → cheapest → biggest → others -->
+          {% set sorted_properties = suggestions.properties|sort(attribute='name') %}
+          {% set cost_effective = sorted_properties|selectattr('name', 'equalto', suggestions.highlights.most_cost_effective) %}
+          {% set cheapest = sorted_properties|selectattr('name', 'equalto', suggestions.highlights.cheapest)|rejectattr('name', 'equalto', suggestions.highlights.most_cost_effective) %}
+          {% set biggest = sorted_properties|selectattr('name', 'equalto', suggestions.highlights.biggest)|rejectattr('name', 'equalto', suggestions.highlights.most_cost_effective)|rejectattr('name', 'equalto', suggestions.highlights.cheapest) %}
+          {% set others = sorted_properties|rejectattr('name', 'equalto', suggestions.highlights.most_cost_effective)|rejectattr('name', 'equalto', suggestions.highlights.cheapest)|rejectattr('name', 'equalto', suggestions.highlights.biggest) %}
 
+          <!-- Cost Effective Locations First -->
+          {% for property in cost_effective %}
           <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
-               data-name="Clean&Go Laundry"
-               data-info="Clean&Go Laundry is located in a densely populated residential area, ensuring a steady flow of customers.">
+               data-name="{{ property.name }}"
+               data-info="Area: {{ property.area_in_sqm }} | Price: {{ property.price }}"
+               data-lat="{{ property.coordinates.lat }}"
+               data-lng="{{ property.coordinates.lng }}"
+               data-highlight="cost_effective">
             <div>
-              <p class="text-white font-medium">Clean&Go Laundry</p>
-              <p class="text-sm text-gray-400">850 m — Makati</p>
+              <p class="text-white font-medium">{{ property.name }}</p>
+              <p class="text-sm text-gray-400">{{ input.location }}</p>
             </div>
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Most cost-effective price</span>
+            <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Most Cost-Effective</span>
           </div>
+          {% endfor %}
 
+          <!-- Cheapest Locations Next -->
+          {% for property in cheapest %}
           <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
-               data-name="LearnSmart Academy"
-               data-info="LearnSmart Academy is situated near schools and communities, offering a prime spot for education-focused ventures.">
+               data-name="{{ property.name }}"
+               data-info="Area: {{ property.area_in_sqm }} | Price: {{ property.price }}"
+               data-lat="{{ property.coordinates.lat }}"
+               data-lng="{{ property.coordinates.lng }}"
+               data-highlight="cheapest">
             <div>
-              <p class="text-white font-medium">LearnSmart Academy</p>
-              <p class="text-sm text-gray-400">2.1 km — Makati</p>
+              <p class="text-white font-medium">{{ property.name }}</p>
+              <p class="text-sm text-gray-400">{{ input.location }}</p>
+            </div>
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Cheapest</span>
+          </div>
+          {% endfor %}
+
+          <!-- Biggest Locations Next -->
+          {% for property in biggest %}
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
+               data-name="{{ property.name }}"
+               data-info="Area: {{ property.area_in_sqm }} | Price: {{ property.price }}"
+               data-lat="{{ property.coordinates.lat }}"
+               data-lng="{{ property.coordinates.lng }}"
+               data-highlight="biggest">
+            <div>
+              <p class="text-white font-medium">{{ property.name }}</p>
+              <p class="text-sm text-gray-400">{{ input.location }}</p>
+            </div>
+            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">Biggest</span>
+          </div>
+          {% endfor %}
+
+          <!-- Other Locations Last -->
+          {% for property in others %}
+          <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer location-item"
+               data-name="{{ property.name }}"
+               data-info="Area: {{ property.area_in_sqm }} | Price: {{ property.price }}"
+               data-lat="{{ property.coordinates.lat }}"
+               data-lng="{{ property.coordinates.lng }}"
+               data-highlight="">
+            <div>
+              <p class="text-white font-medium">{{ property.name }}</p>
+              <p class="text-sm text-gray-400">{{ input.location }}</p>
             </div>
           </div>
+          {% endfor %}
 
         </div>
       </div>
@@ -58,7 +98,7 @@
         </div>
 
         <!-- Return Button (1/4 height) -->
-        <a href="{{ url_for('competitors') }}" 
+        <a href="{{ url_for('map', location=input.location, industries=input.industries) }}" 
            class="h-1/4 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
           ← Return to Competitors
         </a>
@@ -80,31 +120,132 @@
 <script src="https://unpkg.com/d3-voronoi@1.1.4/dist/d3-voronoi.min.js"></script>
 
 <script>
-  const map = L.map('map').setView([14.5995, 120.9842], 13);
+  // Initialize map with first property's coordinates or default
+  {% if suggestions.properties and suggestions.properties|length > 0 %}
+    // Get first property from our sorted list (cost_effective first)
+    {% set first_property = (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.most_cost_effective)|first) or 
+                            (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.cheapest)|first) or 
+                            (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.biggest)|first) or 
+                            suggestions.properties|first %}
+    const firstProperty = {{ first_property.coordinates|tojson }};
+    const map = L.map('map').setView([firstProperty.lat, firstProperty.lng], 13);
+  {% else %}
+    const map = L.map('map').setView([14.5995, 120.9842], 13);
+  {% endif %}
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  const locations = [
-    {name: "ABC Food Hub", lat: 14.5826, lng: 120.9889, tag: "Highest population efficiency"},
-    {name: "Clean&Go Laundry", lat: 14.5638, lng: 121.0294, tag: "Most cost-effective price"},
-    {name: "LearnSmart Academy", lat: 14.5762, lng: 120.9869}
+  // Process properties data in highlight priority order
+  const properties = [
+    // Cost effective first
+    {% for property in suggestions.properties if property.name == suggestions.highlights.most_cost_effective %}
+    {
+      name: "{{ property.name }}",
+      lat: {{ property.coordinates.lat }},
+      lng: {{ property.coordinates.lng }},
+      area: "{{ property.area_in_sqm }}",
+      price: "{{ property.price }}",
+      highlight: "cost_effective"
+    },
+    {% endfor %}
+    
+    // Cheapest next
+    {% for property in suggestions.properties if property.name == suggestions.highlights.cheapest and property.name != suggestions.highlights.most_cost_effective %}
+    {
+      name: "{{ property.name }}",
+      lat: {{ property.coordinates.lat }},
+      lng: {{ property.coordinates.lng }},
+      area: "{{ property.area_in_sqm }}",
+      price: "{{ property.price }}",
+      highlight: "cheapest"
+    },
+    {% endfor %}
+    
+    // Biggest next
+    {% for property in suggestions.properties if property.name == suggestions.highlights.biggest and property.name != suggestions.highlights.most_cost_effective and property.name != suggestions.highlights.cheapest %}
+    {
+      name: "{{ property.name }}",
+      lat: {{ property.coordinates.lat }},
+      lng: {{ property.coordinates.lng }},
+      area: "{{ property.area_in_sqm }}",
+      price: "{{ property.price }}",
+      highlight: "biggest"
+    },
+    {% endfor %}
+    
+    // Others last
+    {% for property in suggestions.properties if property.name != suggestions.highlights.most_cost_effective and property.name != suggestions.highlights.cheapest and property.name != suggestions.highlights.biggest %}
+    {
+      name: "{{ property.name }}",
+      lat: {{ property.coordinates.lat }},
+      lng: {{ property.coordinates.lng }},
+      area: "{{ property.area_in_sqm }}",
+      price: "{{ property.price }}",
+      highlight: ""
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
   ];
 
-  function getColor(index) {
-    const colors = [
-      'rgba(255, 99, 132, 0.5)',
-      'rgba(54, 162, 235, 0.5)',
-      'rgba(255, 206, 86, 0.5)'
-    ];
-    return colors[index % colors.length];
-  }
+  // Process voronoi_data for competitors
+  const competitors = [
+    {% for district, industries in data.items() %}
+      {% for industry, businesses in industries.items() %}
+        {% if industry == input.industries|replace("['", "")|replace("']", "") %}
+          {% for business, details in businesses.items() %}
+            {
+              name: "{{ business }}",
+              lat: parseFloat("{{ details.Coordinates.Latitude }}"),
+              lng: parseFloat("{{ details.Coordinates.Longitude }}"),
+              population: parseInt("{{ details.Population }}"),
+              address: "{{ details.Address }}"
+            },
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  ];
+
+  // Custom icons
+  const markerIcons = {
+    default: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    }),
+    cheapest: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    }),
+    biggest: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    }),
+    cost_effective: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    }),
+    selected: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+      iconSize: [35, 51],
+      iconAnchor: [17, 51]
+    })
+  };
+
+  // Layer groups
+  const voronoiLayer = L.layerGroup().addTo(map);
+  const propertyLayer = L.layerGroup().addTo(map);
+  const competitorLayer = L.layerGroup().addTo(map);
+  let selectedMarker = null;
 
   function createVoronoiDiagram() {
-    const points = locations.map(l => {
-      const pt = map.latLngToContainerPoint([l.lat, l.lng]);
-      return [pt.x, pt.y, l];
+    const points = competitors.map(c => {
+      const pt = map.latLngToContainerPoint([c.lat, c.lng]);
+      return [pt.x, pt.y, c];
     });
 
     const voronoi = d3.voronoi()
@@ -114,54 +255,127 @@
     return voronoi.polygons().map((polygon, i) => {
       if (!polygon) return null;
       const latLngs = polygon.map(p => map.containerPointToLatLng([p[0], p[1]]));
-      return { polygon: latLngs, location: points[i][2] };
+      return { polygon: latLngs, competitor: points[i][2] };
     }).filter(Boolean);
   }
 
-  function drawVoronoiCells() {
-    if (window.voronoiLayer) map.removeLayer(window.voronoiLayer);
+  function drawVoronoi() {
+    voronoiLayer.clearLayers();
     const polygons = createVoronoiDiagram();
-    const voronoiLayer = L.layerGroup().addTo(map);
-    window.voronoiLayer = voronoiLayer;
-
+    
     polygons.forEach((cell, i) => {
-      const color = getColor(i);
+      const color = `hsl(${(i * 60) % 360}, 70%, 50%)`;
       L.polygon(cell.polygon, {
         fillColor: color,
-        fillOpacity: 0.5,
+        fillOpacity: 0.2,
         weight: 1,
-        opacity: 0.8,
-        color: '#333'
-      }).bindPopup(`<b>${cell.location.name}</b>`).addTo(voronoiLayer);
-    });
-
-    locations.forEach((loc) => {
-      L.marker([loc.lat, loc.lng], {icon: L.icon({
-        iconUrl: 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png',
-        iconSize: [27, 43],
-        iconAnchor: [13, 41]
-      })}).bindPopup(`<b>${loc.name}</b>`).addTo(voronoiLayer);
+        opacity: 0.7,
+        color: '#333',
+        dashArray: '5,5'
+      }).bindPopup(`<b>${cell.competitor.name}</b>`).addTo(voronoiLayer);
     });
   }
 
-  map.on('moveend', drawVoronoiCells);
-  map.on('zoomend', drawVoronoiCells);
-  drawVoronoiCells();
+  function drawProperties() {
+    propertyLayer.clearLayers();
+    
+    properties.forEach(property => {
+      const iconType = property.highlight || 'default';
+      L.marker([property.lat, property.lng], {
+        icon: markerIcons[iconType],
+        zIndexOffset: iconType === 'default' ? 0 : 10
+      }).bindPopup(`
+        <div class="text-gray-800">
+          <b>${property.name}</b>
+          <p>Area: ${property.area}</p>
+          <p>Price: ${property.price}</p>
+          ${property.highlight ? `<p class="font-semibold ${property.highlight === 'cheapest' ? 'text-green-500' : property.highlight === 'biggest' ? 'text-blue-500' : 'text-yellow-500'}">${property.highlight.replace('_', ' ').toUpperCase()}</p>` : ''}
+        </div>
+      `).addTo(propertyLayer);
+    });
+  }
 
-  // Update General Info
+  function drawCompetitors() {
+    competitorLayer.clearLayers();
+    
+    competitors.forEach(competitor => {
+      L.circleMarker([competitor.lat, competitor.lng], {
+        radius: 6,
+        fillColor: '#EF4444',
+        color: '#fff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).bindPopup(`
+        <div class="text-gray-800">
+          <b>${competitor.name}</b>
+          <p>${competitor.address}</p>
+          <p>Population: ${competitor.population.toLocaleString()}</p>
+        </div>
+      `).addTo(competitorLayer);
+    });
+  }
+
+  function selectProperty(name) {
+    const property = properties.find(p => p.name === name);
+    if (!property) return;
+    
+    if (selectedMarker) {
+      propertyLayer.removeLayer(selectedMarker);
+    }
+    
+    selectedMarker = L.marker([property.lat, property.lng], {
+      icon: markerIcons.selected,
+      zIndexOffset: 100
+    }).bindPopup(`
+      <div class="text-gray-800">
+        <b>${property.name}</b>
+        <p>Area: ${property.area}</p>
+        <p>Price: ${property.price}</p>
+        ${property.highlight ? `<p class="font-semibold ${property.highlight === 'cheapest' ? 'text-green-500' : property.highlight === 'biggest' ? 'text-blue-500' : 'text-yellow-500'}">${property.highlight.replace('_', ' ').toUpperCase()}</p>` : ''}
+      </div>
+    `).addTo(propertyLayer);
+    
+    map.setView([property.lat, property.lng], 15);
+    selectedMarker.openPopup();
+  }
+
+  // Initial draw
+  drawVoronoi();
+  drawProperties();
+  drawCompetitors();
+
+  // Select first property by default (following our priority order)
+  {% if suggestions.properties and suggestions.properties|length > 0 %}
+    {% set first_property = (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.most_cost_effective)|first) or 
+                            (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.cheapest)|first) or 
+                            (suggestions.properties|selectattr('name', 'equalto', suggestions.highlights.biggest)|first) or 
+                            suggestions.properties|first %}
+    selectProperty("{{ first_property.name }}");
+  {% endif %}
+
+  // Update selection on click
   document.querySelectorAll('.location-item').forEach(item => {
     item.addEventListener('click', () => {
       const name = item.dataset.name;
       const info = item.dataset.info;
+      const highlight = item.dataset.highlight;
+      
       document.getElementById('general-info-content').innerHTML = `
         <div>
           <h3 class="text-xl font-semibold text-white">${name}</h3>
           <p class="text-gray-300">${info}</p>
+          ${highlight ? `<p class="mt-2 ${highlight === 'cheapest' ? 'text-green-400' : highlight === 'biggest' ? 'text-blue-400' : 'text-yellow-400'} font-medium">${highlight.replace('_', ' ').toUpperCase()}</p>` : ''}
         </div>
       `;
+      
+      selectProperty(name);
     });
   });
+
+  // Redraw Voronoi on map events
+  map.on('moveend', drawVoronoi);
+  map.on('zoomend', drawVoronoi);
 </script>
 
 {% endblock %}
-

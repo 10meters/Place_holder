@@ -10,23 +10,30 @@
       <!-- Top Half: Nearby Competitors -->
       <div class="flex-1 p-6 overflow-y-auto border-b border-gray-700">
         <h2 class="text-2xl font-semibold text-white mb-6">Explore the Competition</h2>
-        <div class="space-y-4">
+        <div class="space-y-4" id="competitors-list">
           {% for district, categories in data.items() %}
             {% for category, businesses in categories.items() %}
               {% for name, details in businesses.items() %}
-                <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer" 
+                <div class="flex justify-between items-center bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer competitor-item" 
+                     data-category="{{ category }}"
+                     data-name="{{ name }}"
                      onclick="showVoronoiForCategory('{{ category }}', '{{ name }}')">
                   <div>
                     <p class="text-white font-medium">{{ name }}</p>
                     <p class="text-sm text-gray-400">{{ details.Address }}</p>
                   </div>
-                  <span class="
-                    {% if category == 'Education' %}bg-yellow-500
-                    {% elif category == 'Hospitals' %}bg-red-500
-                    {% else %}bg-indigo-500{% endif %}
-                    text-white px-3 py-1 rounded-full text-sm">
-                    {{ category }}
-                  </span>
+                  <div class="flex flex-col items-end">
+                    <span class="
+                      {% if category == 'Education' %}bg-yellow-500
+                      {% elif category == 'Hospitals' %}bg-red-500
+                      {% else %}bg-indigo-500{% endif %}
+                      text-white px-3 py-1 rounded-full text-sm mb-1">
+                      {{ category }}
+                    </span>
+                    <span class="text-xs text-gray-300">
+                      Population: {{ details.Population or 'N/A' }}
+                    </span>
+                  </div>
                 </div>
               {% endfor %}
             {% endfor %}
@@ -45,11 +52,23 @@
           </div>
         </div>
 
-        <!-- Set-up Business Button (1/4 height) -->
-        <a href="{{ url_for('suggestions') }}" 
-           class="h-1/4 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
-          Set-up Your Business Here →
-        </a>
+        <!-- Button Container (1/4 height) -->
+        <div class="h-1/4 flex">
+          <!-- Back Button -->
+          <a href="{{ url_for('user_input') }}" 
+             class="flex-1 bg-gray-600 hover:bg-gray-500 text-white flex items-center justify-center text-lg font-semibold transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Back
+          </a>
+          
+          <!-- Set-up Business Button -->
+          <a href="{{ url_for('suggestions', location=input['location'], industries=input['industries']) }}" 
+             class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold transition">
+            Set-up Your Business →
+          </a>
+        </div>
 
       </div>
 
@@ -88,6 +107,7 @@
               lng: parseFloat("{{ details.Coordinates.Longitude }}"),
               address: "{{ details.Address }}",
               contact: "{{ details['Contact Number'] }}",
+              population: "{{ details.Population }}",
               {% if category == 'Education' %}
               type: "{{ details['Kind of School'] }}"
               {% endif %}
@@ -107,38 +127,28 @@
   // Enhanced color palettes for each category
   const categoryPalettes = {
     'Education': [
-      '#FFD700', // Vivid Yellow (Gold)
-      '#FF4500', // Orange-Red
-      '#9400D3', // Deep Purple
-      '#00BFFF', // Bright Sky Blue
-      '#00FA9A'  // Medium Spring Green
+      '#FFD700', '#FF4500', '#9400D3', '#00BFFF', '#00FA9A'
     ],
     'Hospitals': [
-      '#FF0000', // Pure Red
-      '#00FFFF', // Cyan
-      '#FF00FF', // Magenta
-      '#FFFF00', // Yellow
-      '#FFA500'  // Orange
+      '#FF0000', '#00FFFF', '#FF00FF', '#FFFF00', '#FFA500'
     ],
     'Markets': [
-      '#0000FF', // Pure Blue
-      '#FF8C00', // Dark Orange
-      '#4B0082', // Indigo
-      '#7CFC00', // Lawn Green
-      '#FF1493'  // Deep Pink
+      '#0000FF', '#FF8C00', '#4B0082', '#7CFC00', '#FF1493'
     ],
     'Default': [
-      '#00FF00', // Pure Green
-      '#FF007F', // Rose
-      '#000080', // Navy Blue
-      '#FFD700', // Gold
-      '#8A2BE2'  // Blue Violet
+      '#00FF00', '#FF007F', '#000080', '#FFD700', '#8A2BE2'
     ]
   };
 
-  function getColor(category, index) {
+  // Stable color generator using business names as seeds
+  function stringToColor(str, category) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
     const palette = categoryPalettes[category] || categoryPalettes['Default'];
-    return palette[index % palette.length];
+    const index = Math.abs(hash) % palette.length;
+    return palette[index];
   }
 
   function createVoronoiDiagram(points) {
@@ -158,25 +168,35 @@
     }).filter(Boolean);
   }
 
+  function highlightListItem(name) {
+    document.querySelectorAll('.competitor-item').forEach(item => {
+      if (item.dataset.name === name) {
+        item.classList.add('bg-gray-600');
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        item.classList.remove('bg-gray-600');
+      }
+    });
+  }
+
   function drawVoronoiCells() {
     // Clear existing layers
     if (voronoiLayer) map.removeLayer(voronoiLayer);
-    if (highlightedMarker) map.removeLayer(highlightedMarker);
     
     // Get locations for the current category
     const locations = allLocations[currentCategory] || [];
     const polygons = createVoronoiDiagram(locations);
     voronoiLayer = L.layerGroup().addTo(map);
 
-    // Draw Voronoi cells with palette colors
-    polygons.forEach((cell, index) => {
+    // Draw Voronoi cells
+    polygons.forEach((cell) => {
       const isHighlighted = currentHighlight && cell.location.name === currentHighlight;
-      const color = getColor(currentCategory, index);
+      const color = stringToColor(cell.location.name, currentCategory);
       
-      L.polygon(cell.polygon, {
+      const polygon = L.polygon(cell.polygon, {
         fillColor: color,
-        fillOpacity: 0.4,
-        weight: isHighlighted ? 4 : 2,
+        fillOpacity: isHighlighted ? 0.6 : 0.4,
+        weight: isHighlighted ? 3 : 2,
         opacity: 1,
         color: isHighlighted ? '#ffffff' : '#333333',
         dashArray: isHighlighted ? null : '5,5'
@@ -185,21 +205,33 @@
           <b class="text-lg">${cell.location.name}</b>
           <p class="mt-1">${cell.location.address}</p>
           <p class="mt-1"><b>Contact:</b> ${cell.location.contact}</p>
+          <p class="mt-1"><b>Population:</b> ${cell.location.population || 'N/A'}</p>
           ${cell.location.type ? `<p><b>Type:</b> ${cell.location.type}</p>` : ''}
         </div>
-      `).addTo(voronoiLayer);
+      `, {
+        autoClose: false,
+        closeOnClick: false,
+        autoPan: false
+      });
+
+      polygon.on('click', () => {
+        showVoronoiForCategory(currentCategory, cell.location.name);
+        highlightListItem(cell.location.name);
+      });
+
+      polygon.addTo(voronoiLayer);
     });
 
-    // Draw markers with matching palette colors
-    locations.forEach((location, index) => {
+    // Draw markers
+    locations.forEach((location) => {
       const isHighlighted = currentHighlight && location.name === currentHighlight;
-      const color = getColor(currentCategory, index);
+      const color = stringToColor(location.name, currentCategory);
       
       const marker = L.circleMarker([location.lat, location.lng], {
-        radius: isHighlighted ? 12 : 8,
+        radius: isHighlighted ? 10 : 7,
         fillColor: color,
         color: isHighlighted ? '#ffffff' : '#333333',
-        weight: isHighlighted ? 4 : 2,
+        weight: isHighlighted ? 3 : 2,
         opacity: 1,
         fillOpacity: 0.9
       }).bindPopup(`
@@ -207,9 +239,14 @@
           <b class="text-lg">${location.name}</b>
           <p class="mt-1">${location.address}</p>
           <p class="mt-1"><b>Contact:</b> ${location.contact}</p>
+          <p class="mt-1"><b>Population:</b> ${location.population || 'N/A'}</p>
           ${location.type ? `<p><b>Type:</b> ${location.type}</p>` : ''}
         </div>
-      `).addTo(voronoiLayer);
+      `, {
+        autoClose: false,
+        closeOnClick: false,
+        autoPan: false
+      }).addTo(voronoiLayer);
 
       if (isHighlighted) {
         highlightedMarker = marker;
@@ -222,6 +259,7 @@
     currentCategory = category;
     currentHighlight = name;
     drawVoronoiCells();
+    highlightListItem(name);
     
     // Update the general info panel
     const location = allLocations[category].find(loc => loc.name === name);
@@ -233,6 +271,7 @@
         <p><span class="font-medium text-gray-300">Category:</span> ${category}</p>
         <p><span class="font-medium text-gray-300">Address:</span> ${location.address}</p>
         <p><span class="font-medium text-gray-300">Contact:</span> ${location.contact}</p>
+        <p><span class="font-medium text-gray-300">Population:</span> ${location.population || 'N/A'}</p>
     `;
     
     if (category === 'Education') {
@@ -258,17 +297,10 @@
 
   // Initial render
   if (Object.keys(allLocations).length > 0) {
-    // First check if we have any data
     const firstCategory = Object.keys(allLocations)[0];
     if (allLocations[firstCategory] && allLocations[firstCategory].length > 0) {
-      // Show the first location in the first category
       showVoronoiForCategory(firstCategory, allLocations[firstCategory][0].name);
-    } else {
-      // Just draw the map with no voronoi if no data
-      console.log("No location data available");
     }
-  } else {
-    console.log("No categories available");
   }
 </script>
 
